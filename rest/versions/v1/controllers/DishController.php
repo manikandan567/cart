@@ -4,6 +4,7 @@ namespace rest\versions\v1\controllers;
 use Yii;
 use yii\rest\Controller;
 use common\models\Dish;
+use yii\helpers\ArrayHelper;
 
 /* 
  * To change this license header, choose License Headers in Project Properties.
@@ -20,4 +21,19 @@ class DishController extends Controller
         $dish->load($bodyParams, '');
         $dish->save();
     }
+    
+    public function actionDishes()
+    {
+        $dish = Dish::find()->all();
+
+            return [
+            'data' => ArrayHelper::toArray($dish, [
+                Dish::class => [
+                    'id' => 'id',
+                    'name' => 'name',
+                    'price' => 'price',
+                ]
+            ]),
+        ];
+    }        
 }

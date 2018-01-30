@@ -47,6 +47,8 @@ return [
                 'GET v1/users' => 'v1/user/index',
                 'OPTIONS v1/dish/create' => 'v1/dish/create',
                 'POST v1/dish/create' => 'v1/dish/create',
+                'OPTIONS v1/dishes' => 'v1/dish/dishes',
+                'GET v1/dishes' => 'v1/dish/dishes',
             ],
         ],
     ],
