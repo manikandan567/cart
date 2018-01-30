@@ -45,6 +45,8 @@ return [
                 ['class' => 'yii\rest\UrlRule', 'controller' => ['v1/post', 'v1/comment', 'v2/post']],
                 'OPTIONS v1/users' => 'v1/user/index',
                 'GET v1/users' => 'v1/user/index',
+                'OPTIONS v1/dish/create' => 'v1/dish/create',
+                'POST v1/dish/create' => 'v1/dish/create',
             ],
         ],
     ],
