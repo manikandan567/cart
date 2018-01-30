@@ -5,7 +5,9 @@ use Yii;
 use yii\rest\Controller;
 use common\models\Dish;
 use yii\helpers\ArrayHelper;
-
+use yii\filters\auth\CompositeAuth;
+use yii\filters\auth\HttpBearerAuth;
+use yii\filters\AccessControl;
 /* 
  * To change this license header, choose License Headers in Project Properties.
  * To change this template file, choose Tools | Templates
@@ -14,7 +16,30 @@ use yii\helpers\ArrayHelper;
 
 class DishController extends Controller
 {
-    public function actionCreate()
+    public function behaviors() {
+        $behaviors = parent::behaviors();
+        $behaviors['authenticator'] = [
+            'class' => CompositeAuth::className(), 
+            'optional' => ['create'],
+            'authMethods' => [
+                HttpBearerAuth::className(),
+            ],
+        ];
+        $behaviors['access']	    = [
+            'class' => AccessControl::className(),
+            'only' => [],
+            'rules' => [
+                    [
+                        'actions' => ['create'],
+                            'allow' => true,
+                            'roles' => ['chef'],
+                    ],
+            ],
+        ];
+        return $behaviors;
+    }
+
+        public function actionCreate()
     {
         $dish = new Dish();
         $bodyParams = Yii::$app->getRequest()->getBodyParams();
@@ -35,5 +60,5 @@ class DishController extends Controller
                 ]
             ]),
         ];
-    }        
+    }
 }
