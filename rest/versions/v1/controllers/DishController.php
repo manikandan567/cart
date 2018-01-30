@@ -44,9 +44,10 @@ class DishController extends Controller
         $dish = new Dish();
         $bodyParams = Yii::$app->getRequest()->getBodyParams();
         $user = Yii::$app->user->id;
-        $dish->load($bodyParams, '');
-        $dish->chefId = $user;        
-        $dish->save();
+        if ($dish->load($bodyParams, '')) {
+            $dish->chefId = $user;        
+            $dish->save();
+        }
     }
     
     public function actionDelete()
