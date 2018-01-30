@@ -49,6 +49,8 @@ return [
                 'POST v1/dish/create' => 'v1/dish/create',
                 'OPTIONS v1/dishes' => 'v1/dish/dishes',
                 'GET v1/dishes' => 'v1/dish/dishes',
+                'OPTIONS v1/dish/delete' => 'v1/dish/delete',
+                'DELETE v1/dish/delete' => 'v1/dish/delete',
             ],
         ],
     ],

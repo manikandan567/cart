@@ -20,7 +20,7 @@ class DishController extends Controller
         $behaviors = parent::behaviors();
         $behaviors['authenticator'] = [
             'class' => CompositeAuth::className(), 
-            'optional' => ['create'],
+            'optional' => ['create', 'delete'],
             'authMethods' => [
                 HttpBearerAuth::className(),
             ],
@@ -30,7 +30,7 @@ class DishController extends Controller
             'only' => [],
             'rules' => [
                     [
-                        'actions' => ['create'],
+                        'actions' => ['create', 'delete'],
                             'allow' => true,
                             'roles' => ['chef'],
                     ],
@@ -39,7 +39,7 @@ class DishController extends Controller
         return $behaviors;
     }
 
-        public function actionCreate()
+    public function actionCreate()
     {
         $dish = new Dish();
         $bodyParams = Yii::$app->getRequest()->getBodyParams();
@@ -49,6 +49,13 @@ class DishController extends Controller
         $dish->save();
     }
     
+    public function actionDelete()
+    {
+        $bodyParams = Yii::$app->getRequest()->getBodyParams();
+        $dish = Dish::findOne($bodyParams['id']);
+        $dish->delete();
+    }
+
     public function actionDishes()
     {
         $dish = Dish::find()->all();
