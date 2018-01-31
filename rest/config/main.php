@@ -21,6 +21,7 @@ return [
         'response' => [
             'format' => yii\web\Response::FORMAT_JSON,
             'charset' => 'UTF-8',
+            'as beforeSend' => 'rest\behaviors\ResponseBeforeSendBehavior',
         ],
         'log' => [
             'targets' => [

@@ -44,9 +44,19 @@ class DishController extends Controller
         $dish = new Dish();
         $bodyParams = Yii::$app->getRequest()->getBodyParams();
         $user = Yii::$app->user->id;
-        if ($dish->load($bodyParams, '')) {
-            $dish->chefId = $user;        
-            $dish->save();
+        $dish->load($bodyParams, '');
+        if ($dish->validate()) {
+                $dish->chefId = $user;        
+                $dish->save();
+                Yii::$app->response->statusCode = 201;
+                return [
+                    'dishId' => $dish->id,
+                ];
+        } else {
+                Yii::$app->response->statusCode = 422;
+                $response['error']['message'] = current($dish->getFirstErrors()) ?? null;
+
+                return $response;
         }
     }
     
