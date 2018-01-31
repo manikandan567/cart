@@ -41,7 +41,7 @@ class DishController extends Controller
 
     public function actionCreate()
     {
-        $dish = new Dish();
+        $dish = new Dish(['scenario' => Dish::SCENARIO_CREATE]);
         $bodyParams = Yii::$app->getRequest()->getBodyParams();
         $user = Yii::$app->user->id;
         $dish->load($bodyParams, '');
