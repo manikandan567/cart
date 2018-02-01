@@ -11,13 +11,16 @@ use Yii;
 
 class Dish extends \yii\db\ActiveRecord
 {
+    public $actionUserId;
+
     const SCENARIO_CREATE = 'create';
     const SCENARIO_DELETE = 'delete';
-    
+    const SCENARIO_UPDATE = 'update';
+
     public static function tableName() {
         return 'dish';
     }
-    
+
     public function rules() {
         return[
             [['name'], 'string', 'max' => '4096'],
@@ -26,9 +29,10 @@ class Dish extends \yii\db\ActiveRecord
             [['name', 'price'], 'required', 'on' => self::SCENARIO_CREATE],
             [['id'], 'required', 'on' => self::SCENARIO_DELETE],
             ['id', 'validateDish', 'on' => self::SCENARIO_DELETE],
+            ['chefId', 'validateChef', 'on' => self::SCENARIO_UPDATE],
         ];
     }
-    
+
     public function attributeLabels() {
         return[
             'id' => 'Id',
@@ -36,7 +40,7 @@ class Dish extends \yii\db\ActiveRecord
             'price' => 'Price',
         ];
     }
-    
+
     public function validateDish($attributes) {
         $dish = Dish::find()
                 ->where(['id' => $this->id])
@@ -44,6 +48,12 @@ class Dish extends \yii\db\ActiveRecord
 
         if (empty($dish)) {
             $this->addError($attributes, 'Invalid Dish');
+        }
+    }
+
+    public function validateChef($attributes) {
+        if ((int) $this->actionUserId !== (int) $this->chefId) {
+            $this->addError($attributes, 'Invalid Chef');
         }
     }
 

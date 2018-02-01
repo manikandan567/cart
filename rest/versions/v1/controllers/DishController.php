@@ -8,6 +8,7 @@ use yii\helpers\ArrayHelper;
 use yii\filters\auth\CompositeAuth;
 use yii\filters\auth\HttpBearerAuth;
 use yii\filters\AccessControl;
+use yii\web\NotFoundHttpException;
 /* 
  * To change this license header, choose License Headers in Project Properties.
  * To change this template file, choose Tools | Templates
@@ -59,12 +60,24 @@ class DishController extends Controller
         }
     }
     
-    public function actionUpdate($id)
-    {
+    public function actionUpdate($id) {
         $dish = Dish::findOne($id);
+        if (empty($dish)) {
+            Yii::$app->response->statusCode = 404;
+            throw new NotFoundHttpException('The requested page does not exist.');
+        }
+        $dish->setScenario(Dish::SCENARIO_UPDATE);
+        $dish->actionUserId = Yii::$app->user->id;
         $bodyParams = Yii::$app->getRequest()->getBodyParams();
         $dish->load($bodyParams, '');
-        $dish->save();
+        if ($dish->validate()) {
+            $dish->save();
+        } else {
+            Yii::$app->response->statusCode = 422;
+            $response['error']['message'] = current($dish->getFirstErrors()) ?? null;
+
+            return $response;
+        }
     }
 
     public function actionDelete() {
