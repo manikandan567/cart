@@ -62,9 +62,17 @@ class DishController extends Controller
     
     public function actionDelete()
     {
+        $dish = new Dish(['scenario' => Dish::SCENARIO_DELETE]);
         $bodyParams = Yii::$app->getRequest()->getBodyParams();
-        $dish = Dish::findOne($bodyParams['id']);
-        $dish->delete();
+        if ($dish->load($bodyParams, '') && $dish->validate()) {
+                $dish = Dish::findOne($bodyParams['id']);
+                $dish->delete();
+        } else {
+            Yii::$app->response->statusCode = 422;
+                $response['error']['message'] = current($dish->getFirstErrors()) ?? null;
+
+                return $response;
+        }
     }
 
     public function actionDishes()
