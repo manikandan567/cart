@@ -11,6 +11,8 @@ use Yii;
 
 class Dish extends \yii\db\ActiveRecord
 {
+    const SCENARIO_CREATE = 'create';
+    
     public static function tableName() {
         return 'dish';
     }
@@ -19,6 +21,8 @@ class Dish extends \yii\db\ActiveRecord
         return[
             [['name'], 'string', 'max' => '4096'],
             [['price'], 'number'],
+            [['name'], 'unique'],
+            [['name', 'price'], 'required', 'on' => self::SCENARIO_CREATE],
         ];
     }
     

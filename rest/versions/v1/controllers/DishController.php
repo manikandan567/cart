@@ -41,12 +41,23 @@ class DishController extends Controller
 
     public function actionCreate()
     {
-        $dish = new Dish();
+        $dish = new Dish(['scenario' => Dish::SCENARIO_CREATE]);
         $bodyParams = Yii::$app->getRequest()->getBodyParams();
         $user = Yii::$app->user->id;
         $dish->load($bodyParams, '');
-        $dish->chefId = $user;        
-        $dish->save();
+        if ($dish->validate()) {
+                $dish->chefId = $user;        
+                $dish->save();
+                Yii::$app->response->statusCode = 201;
+                return [
+                    'dishId' => $dish->id,
+                ];
+        } else {
+                Yii::$app->response->statusCode = 422;
+                $response['error']['message'] = current($dish->getFirstErrors()) ?? null;
+
+                return $response;
+        }
     }
     
     public function actionDelete()
