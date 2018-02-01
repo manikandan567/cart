@@ -30,7 +30,7 @@ class DishController extends Controller
             'only' => [],
             'rules' => [
                 [
-                    'actions' => ['create', 'delete'],
+                    'actions' => ['create', 'delete', 'update'],
                     'allow' => true,
                     'roles' => ['chef'],
                 ],
@@ -58,6 +58,14 @@ class DishController extends Controller
             return $response;
         }
     }
+    
+    public function actionUpdate($id)
+    {
+        $dish = Dish::findOne($id);
+        $bodyParams = Yii::$app->getRequest()->getBodyParams();
+        $dish->load($bodyParams, '');
+        $dish->save();
+    }
 
     public function actionDelete() {
         $dish = new Dish(['scenario' => Dish::SCENARIO_DELETE]);
@@ -72,7 +80,7 @@ class DishController extends Controller
             return $response;
         }
     }
-
+    
     public function actionDishes() {
         $dish = Dish::find()->all();
 
