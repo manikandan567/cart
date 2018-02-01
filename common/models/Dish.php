@@ -25,6 +25,7 @@ class Dish extends \yii\db\ActiveRecord
             [['name'], 'unique', 'on' => self::SCENARIO_CREATE],
             [['name', 'price'], 'required', 'on' => self::SCENARIO_CREATE],
             [['id'], 'required', 'on' => self::SCENARIO_DELETE],
+            ['id', 'validateDish', 'on' => self::SCENARIO_DELETE],
         ];
     }
     
@@ -35,4 +36,15 @@ class Dish extends \yii\db\ActiveRecord
             'price' => 'Price',
         ];
     }
+    
+    public function validateDish($attributes) {
+        $dish = Dish::find()
+                ->where(['id' => $this->id])
+                ->one();
+
+        if (empty($dish)) {
+            $this->addError($attributes, 'Invalid Dish');
+        }
+    }
+
 }
