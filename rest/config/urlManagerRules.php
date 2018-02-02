@@ -17,5 +17,7 @@ return [
     'GET v1/dish/<id:\d+>' => 'v1/dish/view',
     'OPTIONS v1/dishes' => 'v1/dish/dishes',
     'GET v1/dishes' => 'v1/dish/dishes',
+    'OPTIONS v1/chef/<chefId:\d+>/dishes' => 'v1/dish/chef-dishes',
+    'GET v1/chef/<chefId:\d+>/dishes' => 'v1/dish/chef-dishes',
 ];
 

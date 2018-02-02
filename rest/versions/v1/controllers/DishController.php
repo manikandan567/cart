@@ -31,7 +31,7 @@ class DishController extends Controller
             'only' => [],
             'rules' => [
                 [
-                    'actions' => ['create', 'delete', 'update', 'view', 'dishes'],
+                    'actions' => ['create', 'delete', 'update', 'view', 'dishes', 'chef-dishes'],
                     'allow' => true,
                     'roles' => ['chef'],
                 ],
@@ -124,6 +124,23 @@ class DishController extends Controller
                 ]
             ]),
         ];
+    }
+    
+    public function actionChefDishes($chefId) {
+        $dish = Dish::find()->where(['chefId' => $chefId])->all();
+        if (empty($dish)) {
+            Yii::$app->response->statusCode = 404;
+            throw new NotFoundHttpException('The requested page does not exist.');
+        }
+        return
+                ArrayHelper::toArray($dish, [
+                    Dish::class => [
+                        'id' => 'id',
+                        'chefId' => 'chefId',
+                        'name' => 'name',
+                        'price' => 'price',
+                    ]
+        ]);
     }
 
 }
