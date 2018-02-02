@@ -8,6 +8,7 @@ use yii\helpers\ArrayHelper;
 use yii\filters\auth\CompositeAuth;
 use yii\filters\auth\HttpBearerAuth;
 use yii\filters\AccessControl;
+use yii\web\NotFoundHttpException;
 /* 
  * To change this license header, choose License Headers in Project Properties.
  * To change this template file, choose Tools | Templates
@@ -19,59 +20,84 @@ class DishController extends Controller
     public function behaviors() {
         $behaviors = parent::behaviors();
         $behaviors['authenticator'] = [
-            'class' => CompositeAuth::className(), 
+            'class' => CompositeAuth::className(),
             'optional' => ['create', 'delete'],
             'authMethods' => [
                 HttpBearerAuth::className(),
             ],
         ];
-        $behaviors['access']	    = [
+        $behaviors['access'] = [
             'class' => AccessControl::className(),
             'only' => [],
             'rules' => [
-                    [
-                        'actions' => ['create', 'delete'],
-                            'allow' => true,
-                            'roles' => ['chef'],
-                    ],
+                [
+                    'actions' => ['create', 'delete', 'update'],
+                    'allow' => true,
+                    'roles' => ['chef'],
+                ],
             ],
         ];
         return $behaviors;
     }
 
-    public function actionCreate()
-    {
+    public function actionCreate() {
         $dish = new Dish(['scenario' => Dish::SCENARIO_CREATE]);
         $bodyParams = Yii::$app->getRequest()->getBodyParams();
         $user = Yii::$app->user->id;
         $dish->load($bodyParams, '');
         if ($dish->validate()) {
-                $dish->chefId = $user;        
-                $dish->save();
-                Yii::$app->response->statusCode = 201;
-                return [
-                    'dishId' => $dish->id,
-                ];
+            $dish->chefId = $user;
+            $dish->save();
+            Yii::$app->response->statusCode = 201;
+            return [
+                'dishId' => $dish->id,
+            ];
         } else {
-                Yii::$app->response->statusCode = 422;
-                $response['error']['message'] = current($dish->getFirstErrors()) ?? null;
+            Yii::$app->response->statusCode = 422;
+            $response['error']['message'] = current($dish->getFirstErrors()) ?? null;
 
-                return $response;
+            return $response;
         }
     }
     
-    public function actionDelete()
-    {
+    public function actionUpdate($id) {
+        $dish = Dish::findOne($id);
+        if (empty($dish)) {
+            Yii::$app->response->statusCode = 404;
+            throw new NotFoundHttpException('The requested page does not exist.');
+        }
+        $dish->setScenario(Dish::SCENARIO_UPDATE);
+        $dish->actionUserId = Yii::$app->user->id;
         $bodyParams = Yii::$app->getRequest()->getBodyParams();
-        $dish = Dish::findOne($bodyParams['id']);
-        $dish->delete();
+        $dish->load($bodyParams, '');
+        if ($dish->validate()) {
+            $dish->save();
+        } else {
+            Yii::$app->response->statusCode = 422;
+            $response['error']['message'] = current($dish->getFirstErrors()) ?? null;
+
+            return $response;
+        }
     }
 
-    public function actionDishes()
-    {
+    public function actionDelete() {
+        $dish = new Dish(['scenario' => Dish::SCENARIO_DELETE]);
+        $bodyParams = Yii::$app->getRequest()->getBodyParams();
+        if ($dish->load($bodyParams, '') && $dish->validate()) {
+            $dish = Dish::findOne($bodyParams['id']);
+            $dish->delete();
+        } else {
+            Yii::$app->response->statusCode = 422;
+            $response['error']['message'] = current($dish->getFirstErrors()) ?? null;
+
+            return $response;
+        }
+    }
+    
+    public function actionDishes() {
         $dish = Dish::find()->all();
 
-            return [
+        return [
             'data' => ArrayHelper::toArray($dish, [
                 Dish::class => [
                     'id' => 'id',
@@ -81,4 +107,5 @@ class DishController extends Controller
             ]),
         ];
     }
+
 }
