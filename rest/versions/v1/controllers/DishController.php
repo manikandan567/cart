@@ -9,6 +9,8 @@ use yii\filters\auth\CompositeAuth;
 use yii\filters\auth\HttpBearerAuth;
 use yii\filters\AccessControl;
 use yii\web\NotFoundHttpException;
+use rest\models\search\DishSearch;
+use yii\data\ActiveDataProvider;
 /* 
  * To change this license header, choose License Headers in Project Properties.
  * To change this template file, choose Tools | Templates
@@ -31,7 +33,7 @@ class DishController extends Controller
             'only' => [],
             'rules' => [
                 [
-                    'actions' => ['create', 'delete', 'update', 'view', 'dishes', 'chef-dishes'],
+                    'actions' => ['create', 'delete', 'update', 'view', 'dishes', 'chef-dishes', 'index'],
                     'allow' => true,
                     'roles' => ['chef'],
                 ],
@@ -141,6 +143,23 @@ class DishController extends Controller
                         'price' => 'price',
                     ]
         ]);
+    }
+    
+    public function actionIndex() {
+        $searchModel = new DishSearch();
+        $dataProvider = $searchModel->search(Yii::$app->request->queryParams);
+        $dishes = $dataProvider->getModels();
+        return
+                ArrayHelper::toArray($dishes, [
+                    Dish::class => [
+                        'id' => 'id',
+                        'chefId' => 'chefId',
+                        'name' => 'name',
+                        'price' => 'price',
+                    ]
+        ]);
+
+        return $response;
     }
 
 }

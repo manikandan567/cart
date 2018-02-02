@@ -56,5 +56,9 @@ class Dish extends \yii\db\ActiveRecord
             $this->addError($attributes, 'Invalid Chef');
         }
     }
+    
+    public function getChef() {
+        return $this->hasOne(User::className(), ['id' => 'chefId']);
+    }
 
 }
