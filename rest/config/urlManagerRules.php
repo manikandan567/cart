@@ -21,5 +21,7 @@ return [
     'GET v1/chef/<chefId:\d+>/dishes' => 'v1/dish/chef-dishes',
     'OPTIONS v1/dish' => 'v1/dish/index',
     'GET v1/dish' => 'v1/dish/index',
+    'OPTIONS v1/add-to-cart' => 'v1/cart/add-to-cart',
+    'POST v1/add-to-cart' => 'v1/cart/add-to-cart',
 ];
 
