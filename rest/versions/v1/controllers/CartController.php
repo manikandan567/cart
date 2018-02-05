@@ -34,16 +34,27 @@ class CartController extends Controller
         $cart = new Cart();
         $bodyParams = Yii::$app->getRequest()->getBodyParams();
         $user = Yii::$app->user->id;
+
         $cart->userId = $user;
         $cart->save();
+
         $cartItem = new CartItem();
         $cartItem->cartId = $cart->id;
         $cartItem->save();
-        $cartItemDish = new CartItemDish();
-        $cartItemDish->cartItemId = $cartItem->id;
-        $cartItemDish->dishId = $bodyParams['dishId'];
-        $cartItemDish->qty = $bodyParams['qty'];
-        $cartItemDish->save();
+
+        $cartItemDish = new CartItemDish(['scenario' => CartItemDish::SCENARIO_ADD_TO_CART]);
+        $cartItemDish->load($bodyParams, '');
+        if ($cartItemDish->validate()) {
+            $cartItemDish->cartItemId = $cartItem->id;
+            $cartItemDish->dishId = $bodyParams['dishId'];
+            $cartItemDish->qty = $bodyParams['qty'];
+            $cartItemDish->save();
+        } else {
+            Yii::$app->response->statusCode = 422;
+            $response['error']['message'] = current($cartItemDish->getFirstErrors()) ?? null;
+
+            return $response;
+        }
     }
 
 }
