@@ -31,20 +31,22 @@ class CartController extends Controller
     }
 
     public function actionAddToCart() {
-        $cart = new Cart();
         $bodyParams = Yii::$app->getRequest()->getBodyParams();
         $user = Yii::$app->user->id;
-
-        $cart->userId = $user;
-        $cart->save();
+        $cart = Cart::find()->where(['userId' => $user])->one();
+        if (empty($cart)) {
+            $cart = new Cart();
+            $cart->userId = $user;
+            $cart->save();
+        }
 
         $cartItem = new CartItem();
         $cartItem->cartId = $cart->id;
-        $cartItem->save();
 
         $cartItemDish = new CartItemDish(['scenario' => CartItemDish::SCENARIO_ADD_TO_CART]);
         $cartItemDish->load($bodyParams, '');
         if ($cartItemDish->validate()) {
+            $cartItem->save();
             $cartItemDish->cartItemId = $cartItem->id;
             $cartItemDish->dishId = $bodyParams['dishId'];
             $cartItemDish->qty = $bodyParams['qty'];
