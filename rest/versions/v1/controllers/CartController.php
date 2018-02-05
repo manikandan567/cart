@@ -11,6 +11,7 @@ use common\models\CartItemDish;
 
 class CartController extends Controller
 {
+    
     public function behaviors() {
         $behaviors = parent::behaviors();
         $behaviors['authenticator'] = [
@@ -46,11 +47,18 @@ class CartController extends Controller
         $cartItemDish = new CartItemDish(['scenario' => CartItemDish::SCENARIO_ADD_TO_CART]);
         $cartItemDish->load($bodyParams, '');
         if ($cartItemDish->validate()) {
-            $cartItem->save();
-            $cartItemDish->cartItemId = $cartItem->id;
-            $cartItemDish->dishId = $bodyParams['dishId'];
-            $cartItemDish->qty = $bodyParams['qty'];
-            $cartItemDish->save();
+            $currentDish = CartItemDish::find()->where(['dishId' => $cartItemDish->dishId])->one();
+            if (!empty($currentDish)) {
+                $currentDish->qty = $currentDish->qty + $cartItemDish->qty;
+                $currentDish->save();
+            } else {
+                $cartItem->save();
+                $cartItemDish->cartItemId = $cartItem->id;
+                $cartItemDish->save();
+            }
+
+            Yii::$app->response->statusCode = 201;
+            return new \stdClass();
         } else {
             Yii::$app->response->statusCode = 422;
             $response['error']['message'] = current($cartItemDish->getFirstErrors()) ?? null;
