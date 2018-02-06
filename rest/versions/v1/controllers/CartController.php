@@ -73,6 +73,7 @@ class CartController extends Controller
         $cartItems = $cart->cartItems;
         $bodyParams = Yii::$app->getRequest()->getBodyParams();
         $cart->load($bodyParams, '');
+        $cart->setScenario(Cart::SCENARIO_UPDATE);
         $date = new \DateTime($cart->deliveryDate);
         $time = new \DateTime($cart->deliveryTime);
         $deliveryDate = new \DateTime($date->format('Y-m-d') . ' ' . $time->format('H:i:s'));
@@ -89,7 +90,7 @@ class CartController extends Controller
             return new \stdClass();
         } else {
             Yii::$app->response->statusCode = 422;
-            $errors['error']['message'] = current($cartModel->getFirstErrors()) ?? null;
+            $errors['error']['message'] = current($cart->getFirstErrors()) ?? null;
 
             return $errors;
         }
