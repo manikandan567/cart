@@ -4,6 +4,9 @@ namespace common\models;
 
 class Cart extends \yii\db\ActiveRecord
 {    
+    public $deliveryDate;
+    public $deliveryTime;
+    
     public static function tableName() {
         return 'cart';
     }
@@ -11,7 +14,7 @@ class Cart extends \yii\db\ActiveRecord
     public function rules() {
         return[
             [['userId'], 'integer'],
-            [['requestedDeliveryOn'], 'safe'],
+            [['requestedDeliveryOn', 'deliveryDate', 'deliveryTime'], 'safe'],
         ];
     }
 

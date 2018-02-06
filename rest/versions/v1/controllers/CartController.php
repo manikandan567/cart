@@ -72,11 +72,26 @@ class CartController extends Controller
         $cart = Cart::find()->where(['userId' => Yii::$app->user->id])->one();
         $cartItems = $cart->cartItems;
         $bodyParams = Yii::$app->getRequest()->getBodyParams();
+        $cart->load($bodyParams, '');
+        $date = new \DateTime($cart->deliveryDate);
+        $time = new \DateTime($cart->deliveryTime);
+        $deliveryDate = new \DateTime($date->format('Y-m-d') . ' ' . $time->format('H:i:s'));
+        $cart->requestedDeliveryOn = $deliveryDate->format('Y-m-d H:i:s');
         Model::loadMultiple($cartItems, $bodyParams, 'items');
-        foreach ($cartItems as $cartItem) {
-            $cartItemModel = CartItem::findOne($cartItem->id);
-            $cartItemModel->itemDish->qty = $cartItem->qty;
-            $cartItemModel->itemDish->save();
+        if ($cart->validate()) {
+            $cart->save();
+            foreach ($cartItems as $cartItem) {
+                $cartItemModel = CartItem::findOne($cartItem->id);
+                $cartItemModel->itemDish->qty = $cartItem->qty;
+                $cartItemModel->itemDish->save();
+            }
+            Yii::$app->response->statusCode = 201;
+            return new \stdClass();
+        } else {
+            Yii::$app->response->statusCode = 422;
+            $errors['error']['message'] = current($cartModel->getFirstErrors()) ?? null;
+
+            return $errors;
         }
     }
 
