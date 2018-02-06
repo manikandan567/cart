@@ -11,6 +11,7 @@ use common\models\CartItemDish;
 
 class CartController extends Controller
 {
+    
     public function behaviors() {
         $behaviors = parent::behaviors();
         $behaviors['authenticator'] = [
@@ -31,19 +32,39 @@ class CartController extends Controller
     }
 
     public function actionAddToCart() {
-        $cart = new Cart();
         $bodyParams = Yii::$app->getRequest()->getBodyParams();
         $user = Yii::$app->user->id;
-        $cart->userId = $user;
-        $cart->save();
+        $cart = Cart::find()->where(['userId' => $user])->one();
+        if (empty($cart)) {
+            $cart = new Cart();
+            $cart->userId = $user;
+            $cart->save();
+        }
+
         $cartItem = new CartItem();
         $cartItem->cartId = $cart->id;
-        $cartItem->save();
-        $cartItemDish = new CartItemDish();
-        $cartItemDish->cartItemId = $cartItem->id;
-        $cartItemDish->dishId = $bodyParams['dishId'];
-        $cartItemDish->qty = $bodyParams['qty'];
-        $cartItemDish->save();
+
+        $cartItemDish = new CartItemDish(['scenario' => CartItemDish::SCENARIO_ADD_TO_CART]);
+        $cartItemDish->load($bodyParams, '');
+        if ($cartItemDish->validate()) {
+            $currentDish = CartItemDish::find()->where(['dishId' => $cartItemDish->dishId])->one();
+            if (!empty($currentDish)) {
+                $currentDish->qty = $currentDish->qty + $cartItemDish->qty;
+                $currentDish->save();
+            } else {
+                $cartItem->save();
+                $cartItemDish->cartItemId = $cartItem->id;
+                $cartItemDish->save();
+            }
+
+            Yii::$app->response->statusCode = 201;
+            return new \stdClass();
+        } else {
+            Yii::$app->response->statusCode = 422;
+            $response['error']['message'] = current($cartItemDish->getFirstErrors()) ?? null;
+
+            return $response;
+        }
     }
 
 }
