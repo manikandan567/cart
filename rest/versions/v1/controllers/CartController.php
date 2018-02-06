@@ -8,6 +8,7 @@ use yii\filters\AccessControl;
 use common\models\Cart;
 use common\models\CartItem;
 use common\models\CartItemDish;
+use yii\base\Model;
 
 class CartController extends Controller
 {
@@ -19,10 +20,10 @@ class CartController extends Controller
         ];
         $behaviors['access'] = [
             'class' => AccessControl::className(),
-            'only' => ['add-to-cart'],
+            'only' => ['add-to-cart', 'cart-update'],
             'rules' => [
                 [
-                    'actions' => ['add-to-cart'],
+                    'actions' => ['add-to-cart', 'cart-update'],
                     'allow' => true,
                     'roles' => ['@'],
                 ],
@@ -64,6 +65,18 @@ class CartController extends Controller
             $response['error']['message'] = current($cartItemDish->getFirstErrors()) ?? null;
 
             return $response;
+        }
+    }
+    
+    public function actionCartUpdate() {
+        $cart = Cart::find()->where(['userId' => Yii::$app->user->id])->one();
+        $cartItems = $cart->cartItems;
+        $bodyParams = Yii::$app->getRequest()->getBodyParams();
+        Model::loadMultiple($cartItems, $bodyParams, 'items');
+        foreach ($cartItems as $cartItem) {
+            $cartItemModel = CartItem::findOne($cartItem->id);
+            $cartItemModel->itemDish->qty = $cartItem->qty;
+            $cartItemModel->itemDish->save();
         }
     }
 

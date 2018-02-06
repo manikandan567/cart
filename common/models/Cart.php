@@ -3,7 +3,7 @@ namespace common\models;
 
 
 class Cart extends \yii\db\ActiveRecord
-{
+{    
     public static function tableName() {
         return 'cart';
     }
@@ -21,6 +21,10 @@ class Cart extends \yii\db\ActiveRecord
             'userId' => 'UserId',
             'requestedDeliveryOn' => 'Requested Delivery On',
         ];
+    }
+    
+    public function getCartItems() {
+        return $this->hasMany(CartItem::className(), ['cartId' => 'id']);
     }
 
 }
