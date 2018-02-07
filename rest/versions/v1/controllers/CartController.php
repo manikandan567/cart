@@ -72,7 +72,7 @@ class CartController extends Controller
         $cart = Cart::find()->where(['userId' => Yii::$app->user->id])->one();
         $cartItems = $cart->cartItems;
         $bodyParams = Yii::$app->getRequest()->getBodyParams();
-        $cart->load($bodyParams, '');
+        $cart->load($bodyParams, '');      
         $cart->setScenario(Cart::SCENARIO_UPDATE);
         $date = new \DateTime($cart->deliveryDate);
         $time = new \DateTime($cart->deliveryTime);
