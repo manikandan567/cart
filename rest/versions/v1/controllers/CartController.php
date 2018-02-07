@@ -110,6 +110,7 @@ class CartController extends Controller
                 throw new NotFoundHttpException('The requested page does not exist.');
             } else {
                 $cartItem->delete();
+                $cartItem->itemDish->delete();
             }
         }
     }
