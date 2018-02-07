@@ -23,5 +23,7 @@ return [
     'GET v1/dish' => 'v1/dish/index',
     'OPTIONS v1/add-to-cart' => 'v1/cart/add-to-cart',
     'POST v1/add-to-cart' => 'v1/cart/add-to-cart',
+    'OPTIONS v1/cart' => 'v1/cart/cart-update',
+    'POST v1/cart' => 'v1/cart/cart-update',
 ];
 

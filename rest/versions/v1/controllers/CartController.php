@@ -8,6 +8,7 @@ use yii\filters\AccessControl;
 use common\models\Cart;
 use common\models\CartItem;
 use common\models\CartItemDish;
+use yii\base\Model;
 
 class CartController extends Controller
 {
@@ -19,10 +20,10 @@ class CartController extends Controller
         ];
         $behaviors['access'] = [
             'class' => AccessControl::className(),
-            'only' => ['add-to-cart'],
+            'only' => ['add-to-cart', 'cart-update'],
             'rules' => [
                 [
-                    'actions' => ['add-to-cart'],
+                    'actions' => ['add-to-cart', 'cart-update'],
                     'allow' => true,
                     'roles' => ['@'],
                 ],
@@ -64,6 +65,34 @@ class CartController extends Controller
             $response['error']['message'] = current($cartItemDish->getFirstErrors()) ?? null;
 
             return $response;
+        }
+    }
+    
+    public function actionCartUpdate() {
+        $cart = Cart::find()->where(['userId' => Yii::$app->user->id])->one();
+        $cartItems = $cart->cartItems;
+        $bodyParams = Yii::$app->getRequest()->getBodyParams();
+        $cart->load($bodyParams, '');
+        $cart->setScenario(Cart::SCENARIO_UPDATE);
+        $date = new \DateTime($cart->deliveryDate);
+        $time = new \DateTime($cart->deliveryTime);
+        $deliveryDate = new \DateTime($date->format('Y-m-d') . ' ' . $time->format('H:i:s'));
+        $cart->requestedDeliveryOn = $deliveryDate->format('Y-m-d H:i:s');
+        Model::loadMultiple($cartItems, $bodyParams, 'items');
+        if ($cart->validate()) {
+            $cart->save();
+            foreach ($cartItems as $cartItem) {
+                $cartItemModel = CartItem::findOne($cartItem->id);
+                $cartItemModel->itemDish->qty = $cartItem->qty;
+                $cartItemModel->itemDish->save();
+            }
+            Yii::$app->response->statusCode = 201;
+            return new \stdClass();
+        } else {
+            Yii::$app->response->statusCode = 422;
+            $errors['error']['message'] = current($cart->getFirstErrors()) ?? null;
+
+            return $errors;
         }
     }
 
