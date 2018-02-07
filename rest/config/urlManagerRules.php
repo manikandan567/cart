@@ -25,5 +25,7 @@ return [
     'POST v1/add-to-cart' => 'v1/cart/add-to-cart',
     'OPTIONS v1/cart' => 'v1/cart/cart-update',
     'POST v1/cart' => 'v1/cart/cart-update',
+    'OPTIONS v1/cart' => 'v1/cart/cart-item-delete',
+    'DELETE v1/cart' => 'v1/cart/cart-item-delete',
 ];
 

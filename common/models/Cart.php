@@ -7,6 +7,7 @@ class Cart extends \yii\db\ActiveRecord
     public $deliveryDate;
     public $deliveryTime;
     public $items;
+    public $itemId;
 
     const SCENARIO_UPDATE = 'update';
 
@@ -17,7 +18,7 @@ class Cart extends \yii\db\ActiveRecord
     public function rules() {
         return[
             [['userId'], 'integer'],
-            [['requestedDeliveryOn', 'deliveryDate', 'deliveryTime', 'items'], 'safe'],
+            [['requestedDeliveryOn', 'deliveryDate', 'deliveryTime', 'items', 'itemId'], 'safe'],
             ['requestedDeliveryOn', 'validateDeliveryDate', 'on' => self::SCENARIO_UPDATE],
             ['items', 'validateCartItems', 'on' => self::SCENARIO_UPDATE],
         ];
@@ -29,6 +30,10 @@ class Cart extends \yii\db\ActiveRecord
             'userId' => 'UserId',
             'requestedDeliveryOn' => 'Requested Delivery On',
         ];
+    }
+    
+    public function getCartItem() {
+        return $this->hasOne(CartItem::className(), ['cartId' => 'id']);
     }
 
     public function getCartItems() {
