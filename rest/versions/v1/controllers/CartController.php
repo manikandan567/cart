@@ -9,6 +9,7 @@ use common\models\Cart;
 use common\models\CartItem;
 use common\models\CartItemDish;
 use yii\base\Model;
+use yii\web\NotFoundHttpException;
 
 class CartController extends Controller
 {
@@ -20,10 +21,10 @@ class CartController extends Controller
         ];
         $behaviors['access'] = [
             'class' => AccessControl::className(),
-            'only' => ['add-to-cart', 'cart-update'],
+            'only' => ['add-to-cart', 'cart-update', 'cart-item-delete'],
             'rules' => [
                 [
-                    'actions' => ['add-to-cart', 'cart-update'],
+                    'actions' => ['add-to-cart', 'cart-update', 'cart-item-delete'],
                     'allow' => true,
                     'roles' => ['@'],
                 ],
@@ -72,7 +73,7 @@ class CartController extends Controller
         $cart = Cart::find()->where(['userId' => Yii::$app->user->id])->one();
         $cartItems = $cart->cartItems;
         $bodyParams = Yii::$app->getRequest()->getBodyParams();
-        $cart->load($bodyParams, '');
+        $cart->load($bodyParams, '');      
         $cart->setScenario(Cart::SCENARIO_UPDATE);
         $date = new \DateTime($cart->deliveryDate);
         $time = new \DateTime($cart->deliveryTime);
@@ -93,6 +94,24 @@ class CartController extends Controller
             $errors['error']['message'] = current($cart->getFirstErrors()) ?? null;
 
             return $errors;
+        }
+    }
+    
+    public function actionCartItemDelete() {
+        $bodyParams = Yii::$app->getRequest()->getBodyParams();
+        $cart = Cart::findOne(['userId' => Yii::$app->user->id]);
+        $cart->load($bodyParams, '');
+        if ($cart->validate()) {
+            $cartItem = CartItem::find()
+                    ->where(['cartId' => $cart->id, 'id' => $cart->itemId])
+                    ->one();
+            if (empty($cartItem)) {
+                Yii::$app->response->statusCode = 404;
+                throw new NotFoundHttpException('The requested page does not exist.');
+            } else {
+                $cartItem->delete();
+                $cartItem->itemDish->delete();
+            }
         }
     }
 
