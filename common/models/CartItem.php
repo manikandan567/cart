@@ -13,7 +13,7 @@ class CartItem extends \yii\db\ActiveRecord
     public function rules() {
         return[
             [['cartId', 'qty'], 'integer'],
-            [['qty', 'id'], 'required'],
+            [['id'], 'safe'],
         ];
     }
 

@@ -13,6 +13,7 @@ class CartItemDish extends \yii\db\ActiveRecord
     public function rules() {
         return[
             [['cartItemId', 'dishId', 'qty'], 'integer'],
+            [['qty'], 'required'],
             ['dishId', 'validateDish', 'on' => self::SCENARIO_ADD_TO_CART ]
         ];
     }
