@@ -1,6 +1,7 @@
 <?php
 namespace common\models;
 
+use Yii;
 
 class Cart extends \yii\db\ActiveRecord
 {
@@ -70,6 +71,16 @@ class Cart extends \yii\db\ActiveRecord
         if (!empty(array_diff($cartItemIds1, $cartItemIds2))) {
             $this->addError($attributes, 'Invalid item');
         }
+    }
+    
+    public function beforeDelete() {
+        foreach ($this->cartItemDishes as $cartItemDish) {
+            $cartItemDish->delete();
+        }
+        foreach ($this->cartItems as $cartItem) {
+            $cartItem->delete();
+        }
+        return parent::beforeDelete();
     }
 
 }

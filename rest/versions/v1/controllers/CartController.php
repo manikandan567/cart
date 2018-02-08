@@ -122,12 +122,6 @@ class CartController extends Controller
             Yii::$app->response->statusCode = 404;
             throw new NotFoundHttpException('The requested page does not exist.');
         } else {
-            foreach ($cart->cartItemDishes as $cartItemDish) {
-                $cartItemDish->delete();
-            }
-            foreach ($cart->cartItems as $cartItem) {
-                $cartItem->delete();
-            }
             $cart->delete();
         }
     }
