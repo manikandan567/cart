@@ -21,10 +21,10 @@ class CartController extends Controller
         ];
         $behaviors['access'] = [
             'class' => AccessControl::className(),
-            'only' => ['add-to-cart', 'cart-update', 'cart-item-delete'],
+            'only' => ['add-to-cart', 'cart-update', 'cart-item-delete', 'cart-delete'],
             'rules' => [
                 [
-                    'actions' => ['add-to-cart', 'cart-update', 'cart-item-delete'],
+                    'actions' => ['add-to-cart', 'cart-update', 'cart-item-delete', 'cart-delete'],
                     'allow' => true,
                     'roles' => ['@'],
                 ],
@@ -112,6 +112,23 @@ class CartController extends Controller
                 $cartItem->delete();
                 $cartItem->itemDish->delete();
             }
+        }
+    }
+    
+    public function actionCartDelete() {
+        $user = Yii::$app->user->id;
+        $cart = Cart::find()->where(['userId' => $user])->one();
+        if (empty($cart)) {
+            Yii::$app->response->statusCode = 404;
+            throw new NotFoundHttpException('The requested page does not exist.');
+        } else {
+            foreach ($cart->cartItemDishes as $cartItemDish) {
+                $cartItemDish->delete();
+            }
+            foreach ($cart->cartItems as $cartItem) {
+                $cartItem->delete();
+            }
+            $cart->delete();
         }
     }
 

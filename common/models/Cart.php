@@ -39,6 +39,11 @@ class Cart extends \yii\db\ActiveRecord
     public function getCartItems() {
         return $this->hasMany(CartItem::className(), ['cartId' => 'id']);
     }
+    
+    public function getCartItemDishes() {
+        return $this->hasMany(CartItemDish::className(), ['cartItemId' => 'id'])
+                        ->via('cartItems');
+    }
 
     public function validateDeliveryDate($attributes) {
         $currentDate = new \DateTime();
