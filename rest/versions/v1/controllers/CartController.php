@@ -145,6 +145,9 @@ class CartController extends Controller
                             $time = new \DateTime($cart->requestedDeliveryOn);
                             return $time->format('H:i');
                         },
+                        'chefProfile' => function($cart) {
+                            return $this->getChefProfile($cart->dish->chef);
+                        },
                         'dishes' => function($cart) {
                             return $this->getDishDetails($cart);
                         },
@@ -168,6 +171,15 @@ class CartController extends Controller
                     ]
         ]);
     }
+    
+    public function getChefProfile($chef) {
+        return [
+            'id' => $chef->id,
+            'name' => $chef->username,
+            'email' => $chef->email,
+        ];
+    }
 
 }
+
 
