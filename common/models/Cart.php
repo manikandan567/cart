@@ -51,6 +51,11 @@ class Cart extends \yii\db\ActiveRecord
                         ->via('cartItems');
     }
     
+    public function getDish() {
+        return $this->hasOne(Dish::className(), ['id' => 'dishId'])
+                        ->via('cartItemDish');
+    }
+
     public function getDishes() {
         return $this->hasMany(Dish::className(), ['id' => 'dishId'])
                         ->via('cartItemDishes');
