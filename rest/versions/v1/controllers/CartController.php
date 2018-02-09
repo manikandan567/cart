@@ -10,6 +10,7 @@ use common\models\CartItem;
 use common\models\CartItemDish;
 use yii\base\Model;
 use yii\web\NotFoundHttpException;
+use yii\helpers\ArrayHelper;
 
 class CartController extends Controller
 {
@@ -21,10 +22,10 @@ class CartController extends Controller
         ];
         $behaviors['access'] = [
             'class' => AccessControl::className(),
-            'only' => ['add-to-cart', 'cart-update', 'cart-item-delete'],
+            'only' => ['add-to-cart', 'cart-update', 'cart-item-delete', 'cart-delete', 'my-cart'],
             'rules' => [
                 [
-                    'actions' => ['add-to-cart', 'cart-update', 'cart-item-delete'],
+                    'actions' => ['add-to-cart', 'cart-update', 'cart-item-delete', 'cart-delete', 'my-cart'],
                     'allow' => true,
                     'roles' => ['@'],
                 ],
@@ -113,6 +114,59 @@ class CartController extends Controller
                 $cartItem->itemDish->delete();
             }
         }
+    }
+    
+    public function actionCartDelete() {
+        $user = Yii::$app->user->id;
+        $cart = Cart::find()->where(['userId' => $user])->one();
+        if (empty($cart)) {
+            Yii::$app->response->statusCode = 404;
+            throw new NotFoundHttpException('The requested page does not exist.');
+        } else {
+            $cart->delete();
+        }
+    }
+    
+    public function actionMyCart() {
+        $cart = Cart::find()->where(['userId' => Yii::$app->user->id])->one();
+        if (empty($cart)) {
+            Yii::$app->response->statusCode = 404;
+            throw new NotFoundHttpException('The requested page does not exist.');
+        }
+        return ArrayHelper::toArray($cart, [
+                    Cart::class => [
+                        'id' => 'id',
+                        'userId' => 'userId',
+                        'deliverydate' => function($cart) {
+                            $date = new \DateTime($cart->requestedDeliveryOn);
+                            return $date->format('Y-m-d');
+                        },
+                        'deliveryTime' => function($cart) {
+                            $time = new \DateTime($cart->requestedDeliveryOn);
+                            return $time->format('H:i');
+                        },
+                        'dishes' => function($cart) {
+                            return $this->getDishDetails($cart);
+                        },
+                    ]
+        ]);
+    }
+
+    public function getDishDetails($cart) {
+        return ArrayHelper::toArray($cart->cartItems, [
+                    CartItem::class => [
+                        'id' => 'id',
+                        'dishId' => function($item) {
+                            return $item->itemDish->dishId;
+                        },
+                        'dishName' => function($item) {
+                            return $item->dish->name;
+                        },
+                        'dishPrice' => function($item) {
+                            return $item->dish->price;
+                        },
+                    ]
+        ]);
     }
 
 }

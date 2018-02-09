@@ -1,6 +1,7 @@
 <?php
 namespace common\models;
 
+use Yii;
 
 class Cart extends \yii\db\ActiveRecord
 {
@@ -39,6 +40,21 @@ class Cart extends \yii\db\ActiveRecord
     public function getCartItems() {
         return $this->hasMany(CartItem::className(), ['cartId' => 'id']);
     }
+    
+    public function getCartItemDish() {
+        return $this->hasOne(CartItemDish::className(), ['cartItemId' => 'id'])
+                        ->via('cartItem');
+    }
+    
+    public function getCartItemDishes() {
+        return $this->hasMany(CartItemDish::className(), ['cartItemId' => 'id'])
+                        ->via('cartItems');
+    }
+    
+    public function getDishes() {
+        return $this->hasMany(Dish::className(), ['id' => 'dishId'])
+                        ->via('cartItemDishes');
+    }
 
     public function validateDeliveryDate($attributes) {
         $currentDate = new \DateTime();
@@ -65,6 +81,16 @@ class Cart extends \yii\db\ActiveRecord
         if (!empty(array_diff($cartItemIds1, $cartItemIds2))) {
             $this->addError($attributes, 'Invalid item');
         }
+    }
+    
+    public function beforeDelete() {
+        foreach ($this->cartItemDishes as $cartItemDish) {
+            $cartItemDish->delete();
+        }
+        foreach ($this->cartItems as $cartItem) {
+            $cartItem->delete();
+        }
+        return parent::beforeDelete();
     }
 
 }

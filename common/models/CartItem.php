@@ -13,7 +13,7 @@ class CartItem extends \yii\db\ActiveRecord
     public function rules() {
         return[
             [['cartId', 'qty'], 'integer'],
-            [['qty', 'id'], 'required'],
+            [['id'], 'safe'],
         ];
     }
 
@@ -26,6 +26,11 @@ class CartItem extends \yii\db\ActiveRecord
     
     public function getItemDish() {
         return $this->hasOne(CartItemDish::className(), ['cartItemId' => 'id']);
+    }
+    
+    public function getDish() {
+        return $this->hasOne(Dish::className(), ['id' => 'dishId'])
+                        ->via('itemDish');
     }
 
 }
