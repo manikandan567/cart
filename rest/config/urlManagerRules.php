@@ -29,5 +29,7 @@ return [
     'DELETE v1/cart' => 'v1/cart/cart-item-delete',
     'OPTIONS v1/my-cart' => 'v1/cart/cart-delete',
     'DELETE v1/my-cart' => 'v1/cart/cart-delete',
+    'OPTIONS v1/my-cart' => 'v1/cart/my-cart',
+    'GET v1/my-cart' => 'v1/cart/my-cart',
 ];
 

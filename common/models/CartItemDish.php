@@ -27,6 +27,14 @@ class CartItemDish extends \yii\db\ActiveRecord
         ];
     }
     
+    public function getDish() {
+        return $this->hasOne(Dish::className(), ['id' => 'dishId']);
+    }
+
+    public function getDishes() {
+        return $this->hasMany(Dish::className(), ['id' => 'dishId']);
+    }
+
     public function validateDish($attributes) {
         $dish = Dish::find()->where(['id' => $this->dishId])->one();
         if (empty($dish)) {
