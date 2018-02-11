@@ -1,6 +1,7 @@
 <?php
 namespace common\models;
 
+use Yii;
 
 class CartItemDish extends \yii\db\ActiveRecord
 {
@@ -14,7 +15,8 @@ class CartItemDish extends \yii\db\ActiveRecord
         return[
             [['cartItemId', 'dishId', 'qty'], 'integer'],
             [['qty'], 'required'],
-            ['dishId', 'validateDish', 'on' => self::SCENARIO_ADD_TO_CART ]
+            ['dishId', 'validateDish', 'on' => self::SCENARIO_ADD_TO_CART ],
+            ['dishId', 'validateIsSameChef', 'on' => self::SCENARIO_ADD_TO_CART ],
         ];
     }
 
@@ -39,6 +41,16 @@ class CartItemDish extends \yii\db\ActiveRecord
         $dish = Dish::find()->where(['id' => $this->dishId])->one();
         if (empty($dish)) {
             $this->addError($attributes, 'Invalid Dish');
+        }
+    }
+    
+    public function validateIsSameChef($attributes) {
+        $cart = Cart::find()->where(['userId' => Yii::$app->user->id])->one();
+        if (!empty($cart)) {
+            $dish = Dish::find()->where(['id' => $this->dishId])->one();
+            if ((int) $cart->dish->chef->id !== (int) $dish->chef->id) {
+                $this->addError($attributes, 'Dishes can be add from same chef only');
+            }
         }
     }
 
