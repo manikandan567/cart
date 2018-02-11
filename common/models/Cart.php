@@ -2,6 +2,7 @@
 namespace common\models;
 
 use Yii;
+use DateInterval;
 
 class Cart extends \yii\db\ActiveRecord
 {
@@ -20,7 +21,8 @@ class Cart extends \yii\db\ActiveRecord
         return[
             [['userId'], 'integer'],
             [['requestedDeliveryOn', 'deliveryDate', 'deliveryTime', 'items', 'itemId'], 'safe'],
-            ['requestedDeliveryOn', 'validateDeliveryDate', 'on' => self::SCENARIO_UPDATE],
+            ['requestedDeliveryOn', 'validatePastDeliveryDate', 'on' => self::SCENARIO_UPDATE],
+            ['requestedDeliveryOn', 'validatePossibleDeliveryDate', 'on' => self::SCENARIO_UPDATE],
             ['items', 'validateCartItems', 'on' => self::SCENARIO_UPDATE],
         ];
     }
@@ -61,11 +63,20 @@ class Cart extends \yii\db\ActiveRecord
                         ->via('cartItemDishes');
     }
 
-    public function validateDeliveryDate($attributes) {
+    public function validatePastDeliveryDate($attributes) {
         $currentDate = new \DateTime();
         $deliveryDate = new \DateTime($this->requestedDeliveryOn);
         if ($deliveryDate->format('Y-m-d H:i:s') < $currentDate->format('Y-m-d H:i:s')) {
             $this->addError($attributes, 'Delivery Date Cannot be Past Date');
+        }
+    }
+
+    public function validatePossibleDeliveryDate($attributes) {
+        $currentDate = new \DateTime();
+        $possibleDeliveryDate = $currentDate->add(new DateInterval('P1M'));
+        $deliveryDate = new \DateTime($this->requestedDeliveryOn);
+        if ($deliveryDate->format('Y-m-d H:i:s') > $possibleDeliveryDate->format('Y-m-d H:i:s')) {
+            $this->addError($attributes, 'Delivery Date should be within 1 month from today, max.possible delivery date is ' . $possibleDeliveryDate->format('Y-m-d'));
         }
     }
 
